@@ -42,7 +42,7 @@ class Aarch64_Block():
         print("cut_after is not implemented")
 
     def block_to_str(self, max_va_len, max_page_size_len):
-        fmt = f"{{:>{max_va_len}}} : {{:>{max_page_size_len}}}"
+        fmt = f"{{:>{max_va_len}}} : {{:>16}} {{:>{max_page_size_len}}}"
         uspace_writeable = is_user_writeable(self)
         kspace_writeable = is_kernel_writeable(self)
         uspace_readable = is_user_readable(self)
@@ -50,7 +50,7 @@ class Aarch64_Block():
         uspace_executable = is_user_executable(self)
         kspace_executable = is_kernel_executable(self)
         delim = bcolors.YELLOW + " " + bcolors.ENDC
-        varying_str = fmt.format(hex(self.va), hex(self.page_size))
+        varying_str = fmt.format(hex(self.va), hex(self.phys[0]), hex(self.page_size))
         uspace_color = select_color(uspace_writeable, uspace_executable, uspace_readable)
         uspace_str = uspace_color + f" R:{int(uspace_readable)} W:{int(uspace_writeable)} X:{int(uspace_executable)} " + bcolors.ENDC
         kspace_color = select_color(kspace_writeable, kspace_executable, kspace_readable)
@@ -367,8 +367,8 @@ class PT_Aarch64_Backend(PTArchBackend):
 
     def print_table(self, table):
         max_va_len, max_page_size_len = compute_max_str_len(table)
-        fmt = f"{{:>{max_va_len}}} : {{:>{max_page_size_len}}}"
-        varying_str = fmt.format("Address", "Length")
+        fmt = f"{{:>{max_va_len}}} : {{:>16}} {{:>{max_page_size_len}}}"
+        varying_str = fmt.format("Virt Addr", "Phys Addr", "Length")
         print(bcolors.BLUE + varying_str + "  User space " + "   Kernel space " + bcolors.ENDC)
         for block in table:
             print(block.block_to_str(max_va_len, max_page_size_len))
@@ -376,4 +376,3 @@ class PT_Aarch64_Backend(PTArchBackend):
     def print_stats(self):
         print_stats()
         return
-
